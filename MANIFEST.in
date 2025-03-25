@@ -1,0 +1,18 @@
+# Include all template files
+include src/pgjinja/templates/*.sql.jinja
+include src/pgjinja/templates/**/*.sql.jinja
+
+# Include documentation
+include README.md
+include LICENSE
+include CHANGELOG.md
+
+# Include examples
+include examples/*.py
+
+# Include testing
+include tests/*.py
+
+# Include type information
+include py.typed
+

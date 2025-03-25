@@ -1,0 +1,28 @@
+# Testing
+pytest>=7.0.0
+pytest-asyncio>=0.18.0
+pytest-cov>=3.0.0
+coverage>=6.0.0
+
+# Type checking
+mypy>=0.910
+types-aiofiles
+
+# Linting
+flake8>=4.0.0
+black>=22.1.0
+isort>=5.10.0
+ruff>=0.0.230
+
+# Documentation
+sphinx>=4.4.0
+sphinx-rtd-theme>=1.0.0
+
+# Build and distribution
+build>=0.7.0
+twine>=4.0.0
+wheel>=0.37.0
+
+# Development tools
+pre-commit>=2.17.0
+

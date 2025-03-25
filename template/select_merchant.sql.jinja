@@ -1,1 +1,5 @@
-select * from merchants limit {{limit}}
+SELECT id, name
+FROM merchants
+{% if limit %}
+LIMIT {{ limit }}
+{% endif %}

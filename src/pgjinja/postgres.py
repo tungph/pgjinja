@@ -26,10 +26,8 @@ class PostgresAsync:
         port: int = 5432,
         dbname: str = "public",
         template_dir: PathLike | str = Path(),
-        template_extension: str = "",
     ):
         self.template_dir = Path(template_dir)
-        self.template_extension = template_extension
         self.db = f"{host}:{port}/{dbname}"
 
         self.pool = AsyncConnectionPool(
@@ -71,6 +69,6 @@ class PostgresAsync:
             return cursor.rowcount
 
     async def query(self, template: str, params: dict | None = None, model: type | None = None):
-        statement = _read_text(self.template_dir / f"{template}{self.template_extension}")
+        statement = _read_text(self.template_dir / template)
         query, bind_params = JinjaSql(param_style="format").prepare_query(statement, params or ())
         return await self._run(query, bind_params, model)
