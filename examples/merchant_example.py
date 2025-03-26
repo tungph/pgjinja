@@ -6,11 +6,13 @@ provided by the pgjinja package, using Jinja SQL templates and Pydantic models.
 """
 import asyncio
 import logging
+import configparser
 from functools import cache
+from pathlib import Path
 
 from pydantic import BaseModel
 
-from pgjinja import PostgresAsync
+from src.pgjinja.postgres import PostgresAsync
 
 logging.basicConfig(format=">> %(levelname)s %(name)s  %(message)s", level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -19,7 +21,7 @@ logger = logging.getLogger(__name__)
 class Merchant(BaseModel):
     """
     Pydantic model representing a merchant.
-    
+
     Attributes:
         id: The unique identifier for the merchant
         name: The name of the merchant
@@ -32,31 +34,39 @@ class Merchant(BaseModel):
 def get_postgres():
     """
     Creates and caches a PostgresAsync instance.
-    
+
+    Uses configuration from config.ini file.
+
     Returns:
         PostgresAsync: A configured database connection instance
     """
+    # Load configuration from config.ini
+    config = configparser.ConfigParser()
+    config_path = Path(__file__).parent / 'config.ini'
+    config.read(config_path)
+    
+    db_config = config['database']
     return PostgresAsync(
-        user="user",
-        password="password",
-        host="dev.postgres",
+        user=db_config['user'],
+        password=db_config['password'],
+        host=db_config['host'],
+        dbname=db_config['dbname'],
         template_dir="template",  # Directory containing SQL Jinja templates
-        dbname="dbname",
     )
 
 
 async def select_merchant(limit: int = 3) -> list[Merchant]:
     """
     Fetches merchants from the database with optional limit.
-    
+
     This function demonstrates the elegant way pgjinja handles:
     1. SQL template loading and rendering with parameters
     2. Automatic conversion of query results to Pydantic models
     3. Type safety throughout the query process
-    
+
     Args:
         limit: Maximum number of merchants to return (default: 3)
-        
+
     Returns:
         list[Merchant]: A list of Merchant objects from the database
     """
@@ -80,4 +90,3 @@ async def main():
 if __name__ == "__main__":
     # Run the async main function
     asyncio.run(main())
-

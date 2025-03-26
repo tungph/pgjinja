@@ -5,20 +5,13 @@
 
 # Install dependencies from requirements.txt if it exists
 install:
-	@echo "Installing dependencies..."
-	@if ! command -v uv &> /dev/null; then \
-		echo "Error: uv is not installed. Please install it first (https://github.com/astral-sh/uv)."; \
-		exit 1; \
-	fi
-	@if [ -f requirements.txt ]; then \
-		uv sync -r requirements.txt; \
-	else \
-		echo "No requirements.txt found."; \
-	fi
+	uv sync
 
 # Run tests using pytest (or your preferred test framework)
 test:
-	pip uninstall -y pgjinja && pip install -e . && PYTHONPATH=$PYTHONPATH:$(pwd)/src pytest tests/ -v --cov=src/pgjinja
+	@echo "Setting up and activating virtual environment..."
+	@uv venv || true
+	@. .venv/bin/activate && pip uninstall -y pgjinja && pip install -e . && PYTHONPATH=$PYTHONPATH:$(pwd)/src pytest tests/ -v --cov=src/pgjinja
 
 # Clean up compiled Python files and cache directories
 clean:
@@ -60,10 +53,21 @@ publish-test: build
 # Publish to PyPI
 publish: build
 	@echo "Publishing to PyPI..."
-	@echo "Warning: This will upload the package to PyPI. Make sure you've tested on TestPyPI first. Are you sure? (y/n)"
-	@read -r response; \
+	@echo "Enter the version number (e.g., 1.0.0):"
+	@read -r VERSION; \
+	if ! grep -q "## \[$$VERSION\] -" CHANGELOG.md; then \
+		echo "Error: Version $$VERSION not found in CHANGELOG.md or not properly formatted"; \
+		exit 1; \
+	fi; \
+	echo "Warning: This will upload version $$VERSION to PyPI. Make sure you've tested on TestPyPI first. Are you sure? (y/n)"; \
+	read -r response; \
 	if [ "$$response" = "y" ]; then \
 		twine upload dist/*; \
+		git tag -a v$$VERSION -m "Release version $$VERSION"; \
+		git push origin v$$VERSION; \
+		gh release create v$$VERSION \
+			--title "Release v$$VERSION" \
+			--notes "$$(awk -v ver="$$VERSION" '/^## \[/{p=0} /^## \['ver'\]/{p=1;next} p' CHANGELOG.md)"; \
 	else \
 		echo "Upload cancelled."; \
 	fi

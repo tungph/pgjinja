@@ -43,9 +43,11 @@ allow-direct-references = true
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
 
+[dependency-groups]
+dev = []
+
 [project.optional-dependencies]
 dev = [
-    "black>=25.1.0",
     "build>=0.10.0",
     "twine>=4.0.2",
 ]
