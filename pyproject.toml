@@ -8,9 +8,9 @@ version = "1.0.0"
 description = "A Python package that seamlessly integrates PostgreSQL, Jinja templating, and Pydantic for type-safe database queries"
 readme = "README.md"
 requires-python = ">=3.8"
-license = {text = "MIT"}
+license = { text = "MIT" }
 authors = [
-    {name = "Shawn", email = "shawn.dev.vn@gmail.com"},
+    { name = "Shawn", email = "shawn.dev.vn@gmail.com" },
 ]
 keywords = ["postgresql", "jinja", "pydantic", "sql", "database", "async", "templates"]
 classifiers = [
@@ -44,9 +44,6 @@ allow-direct-references = true
 packages = ["src/pgjinja"]
 
 [dependency-groups]
-dev = []
-
-[project.optional-dependencies]
 dev = [
     "build>=0.10.0",
     "twine>=4.0.2",
