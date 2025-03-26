@@ -40,6 +40,21 @@ dependencies = [
 [tool.hatch.metadata]
 allow-direct-references = true
 
+[tool.hatch.build]
+packages = ["src"]
+exclude = [
+    "tests",
+    "examples",
+    "docs",
+    ".github",
+    ".git",
+    ".venv",
+    "dist",
+    "build",
+    "*.egg-info",
+]
+only-packages = true
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/pgjinja"]
 
