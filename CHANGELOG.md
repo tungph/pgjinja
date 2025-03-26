@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2025-03-26
+
+### Changed
+- Minor release bump
+
 ## [1.1.0] - 2025-03-26
 
 ### Added
@@ -27,7 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Basic functionality
 - Initial release
 
-[Unreleased]: https://github.com/tungph/pgjinja/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/tungph/pgjinja/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/tungph/pgjinja/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/tungph/pgjinja/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/tungph/pgjinja/compare/v0.1.0...v1.0.0
 [0.1.0]: https://github.com/tungph/pgjinja/releases/tag/v0.1.0
