@@ -1,5 +1,4 @@
-SELECT id, name
+SELECT {{_model_fields_|safe}}
 FROM merchants
-{% if limit %}
-LIMIT {{ limit }}
-{% endif %}
+    {% if
+limit %} LIMIT {{ limit }} {% endif %}

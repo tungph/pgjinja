@@ -8,6 +8,7 @@ from typing import LiteralString
 from jinjasql import JinjaSql
 from psycopg.conninfo import make_conninfo
 from psycopg_pool import AsyncConnectionPool
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,20 @@ logger = logging.getLogger(__name__)
 @cache
 def _read_text(file: Path) -> str:
     return file.read_text(encoding="utf8")
+
+
+@cache
+def _get_model_fields(model: type) -> str:
+    if not issubclass(model, BaseModel):
+        raise TypeError(f"{model} is not a subclass of pydantic.BaseModel")
+
+    fields = []
+    for name, field_info in model.model_fields.items():
+        if alias := field_info.validation_alias:
+            fields.append(alias)
+        else:
+            fields.append(name)
+    return ", ".join(fields)
 
 
 class PgJinja:
@@ -76,6 +91,14 @@ class PgJinja:
     async def query(
         self, template: str, params: dict | None = None, model: type | None = None
     ):
+        if params is None:
+            params = dict()
+
+        if model is dict:
+            params |= dict(_model_fields_=", ".join(model.__annotations__.keys()))
+        elif isinstance(model, type) and issubclass(model, BaseModel):
+            params |= dict(_model_fields_=_get_model_fields(model))
+
         statement = _read_text(self.template_dir / template)
         query, bind_params = JinjaSql(param_style="format").prepare_query(
             statement, params or ()
