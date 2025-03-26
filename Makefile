@@ -84,11 +84,6 @@ publish: build
 		git push origin v$$VERSION; \
 		gh release create v$$VERSION \
 			--title "Release v$$VERSION" \
-help:
-	@echo "Available targets:"
-	@echo ""
-	@echo "  default      - Run clean, install, format, lint, test in sequence (default target)"
-	@echo "  install      - Install project dependencies"
 
 # Show help information
 help:
