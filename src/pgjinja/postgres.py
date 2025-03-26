@@ -53,7 +53,12 @@ class PostgresAsync:
             logger.debug(f"Opened connection pool to {self.db}")
             self._is_pool_open = True
 
-    async def _run(self, query: LiteralString, params: dict | Sequence = (), model: type | None = None):
+    async def _run(
+        self,
+        query: LiteralString,
+        params: dict | Sequence = (),
+        model: type | None = None,
+    ):
         await self._open_pool()
         async with self.pool.connection() as connection, connection.cursor() as cursor:
             await cursor.execute(query, params)
@@ -68,7 +73,11 @@ class PostgresAsync:
 
             return cursor.rowcount
 
-    async def query(self, template: str, params: dict | None = None, model: type | None = None):
+    async def query(
+        self, template: str, params: dict | None = None, model: type | None = None
+    ):
         statement = _read_text(self.template_dir / template)
-        query, bind_params = JinjaSql(param_style="format").prepare_query(statement, params or ())
+        query, bind_params = JinjaSql(param_style="format").prepare_query(
+            statement, params or ()
+        )
         return await self._run(query, bind_params, model)

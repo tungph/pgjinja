@@ -1,7 +1,13 @@
 # Makefile for Python project management
 
 # .PHONY declaration prevents conflicts with files of the same name
-.PHONY: install test clean lint format lint-format build publish-test publish help
+.PHONY: install test clean lint format lint-format build publish-test publish help default
+
+# Set the default target
+.DEFAULT_GOAL := default
+# Default target - runs clean, install, format, lint, test in sequence
+default: clean install format lint test
+	@echo "Default sequence completed: clean, install, format, lint, test"
 
 # Install dependencies from requirements.txt if it exists
 install:
@@ -11,7 +17,7 @@ install:
 test:
 	@echo "Setting up and activating virtual environment..."
 	@. .venv/bin/activate && \
-		uv pip install pytest pytest-asyncio pytest-cov && \  ruff
+		uv pip install pytest pytest-asyncio pytest-cov && \
 		uv pip install -e . && \
 		cd src && \
 		PYTHONPATH=. pytest ../tests/ -v \
@@ -38,12 +44,12 @@ lint:
 
 # Format code using ruff
 format:
+	@echo "Formatting code with ruff..."
+	ruff format .
 
 # Run both linting and formatting
 lint-format: lint format
-t@echo "Linting and formatting completed!"
-	@echo "Formatting code with black..."
-	ruff format .
+	@echo "Linting and formatting completed!"
 
 # Build distribution packages
 build: clean
@@ -78,10 +84,11 @@ publish: build
 		git push origin v$$VERSION; \
 		gh release create v$$VERSION \
 			--title "Release v$$VERSION" \
-			--notes "$$(awk -v ver="$$VERSION" '/^## \[/{p=0} /^## \['ver'\]/{p=1;next} p' CHANGELOG.md)"; \
-	else \
-		echo "Upload cancelled."; \
-	fi
+help:
+	@echo "Available targets:"
+	@echo ""
+	@echo "  default      - Run clean, install, format, lint, test in sequence (default target)"
+	@echo "  install      - Install project dependencies"
 
 # Show help information
 help:
@@ -91,7 +98,7 @@ help:
 	@echo "  clean   - Clean up Python cache files"
 	@echo "  lint    - Run code linting with ruff"
 	@echo "  format  - Format code with ruff"
-t@echo "  lint-format - Run both linting and formatting with ruff"
+	@echo "  lint-format - Run both linting and formatting with ruff"
 	@echo "  build   - Build distribution packages"
 	@echo "  publish-test - Publish package to TestPyPI"
 	@echo "  publish - Publish package to PyPI"

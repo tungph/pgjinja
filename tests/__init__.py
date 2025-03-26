@@ -1,4 +1,3 @@
 """
 Test package for pgjinja.
 """
-

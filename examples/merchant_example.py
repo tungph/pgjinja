@@ -4,9 +4,10 @@ Example demonstrating how to use pgjinja for querying merchants from a database.
 This example shows the elegant and type-safe approach to database queries
 provided by the pgjinja package, using Jinja SQL templates and Pydantic models.
 """
+
 import asyncio
-import logging
 import configparser
+import logging
 from functools import cache
 from pathlib import Path
 
@@ -14,7 +15,9 @@ from pydantic import BaseModel
 
 from src.pgjinja.postgres import PostgresAsync
 
-logging.basicConfig(format=">> %(levelname)s %(name)s  %(message)s", level=logging.DEBUG)
+logging.basicConfig(
+    format=">> %(levelname)s %(name)s  %(message)s", level=logging.DEBUG
+)
 logger = logging.getLogger(__name__)
 
 
@@ -26,6 +29,7 @@ class Merchant(BaseModel):
         id: The unique identifier for the merchant
         name: The name of the merchant
     """
+
     id: int
     name: str
 
@@ -42,15 +46,15 @@ def get_postgres():
     """
     # Load configuration from config.ini
     config = configparser.ConfigParser()
-    config_path = Path(__file__).parent / 'config.ini'
+    config_path = Path(__file__).parent / "config.ini"
     config.read(config_path)
-    
-    db_config = config['database']
+
+    db_config = config["database"]
     return PostgresAsync(
-        user=db_config['user'],
-        password=db_config['password'],
-        host=db_config['host'],
-        dbname=db_config['dbname'],
+        user=db_config["user"],
+        password=db_config["password"],
+        host=db_config["host"],
+        dbname=db_config["dbname"],
         template_dir="template",  # Directory containing SQL Jinja templates
     )
 

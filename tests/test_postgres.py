@@ -2,7 +2,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from pgjinja.postgres import PostgresAsync
 
@@ -12,7 +12,7 @@ class TestPostgresAsync(unittest.IsolatedAsyncioTestCase):
         # Create temp directory and template
         self.temp_dir = tempfile.mkdtemp()
         self.test_file = os.path.join(self.temp_dir, "test.sql")
-        with open(self.test_file, 'w') as f:
+        with open(self.test_file, "w") as f:
             f.write("""
                 SELECT *
                 FROM users
@@ -23,7 +23,7 @@ class TestPostgresAsync(unittest.IsolatedAsyncioTestCase):
 
         # Create cursor mock with async context support
         self.cursor = MagicMock()
-        self.cursor.description = [('id',), ('name',)]
+        self.cursor.description = [("id",), ("name",)]
         self.cursor.fetchall = AsyncMock(return_value=[(1, "test")])
         self.cursor.execute = AsyncMock()
 
@@ -43,7 +43,7 @@ class TestPostgresAsync(unittest.IsolatedAsyncioTestCase):
         self.pool.open = AsyncMock()
 
         # Setup pool patcher
-        self.pool_patcher = patch('pgjinja.postgres.AsyncConnectionPool')
+        self.pool_patcher = patch("pgjinja.postgres.AsyncConnectionPool")
         self.mock_pool_class = self.pool_patcher.start()
         self.mock_pool_class.return_value = self.pool
 
@@ -54,7 +54,7 @@ class TestPostgresAsync(unittest.IsolatedAsyncioTestCase):
             host="localhost",
             port=5432,
             dbname="test_db",
-            template_dir=self.temp_dir
+            template_dir=self.temp_dir,
         )
 
     async def asyncTearDown(self):
@@ -87,11 +87,14 @@ class TestPostgresAsync(unittest.IsolatedAsyncioTestCase):
     async def test_parameterized_query(self):
         """Test query with parameters"""
         result = await self.db_client._run("SELECT * FROM test WHERE id = %s", (1,))
-        self.cursor.execute.assert_called_once_with("SELECT * FROM test WHERE id = %s", (1,))
+        self.cursor.execute.assert_called_once_with(
+            "SELECT * FROM test WHERE id = %s", (1,)
+        )
         self.assertEqual(result, [(1, "test")])
 
     async def test_model_mapping(self):
         """Test query with model mapping"""
+
         class TestModel:
             def __init__(self, id: int, name: str):
                 self.id = id
@@ -134,5 +137,6 @@ class TestPostgresAsync(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(FileNotFoundError):
             await self.db_client.query("nonexistent.sql", {})
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

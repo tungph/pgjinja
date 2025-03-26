@@ -21,4 +21,3 @@ from .postgres import PostgresAsync
 __all__ = [
     "PostgresAsync",
 ]
-
