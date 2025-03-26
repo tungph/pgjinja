@@ -13,7 +13,7 @@ Features:
 - Simple API for executing queries and processing results
 """
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
 from .pgjinja import PgJinja
 
