@@ -120,9 +120,45 @@ operations should not block the event loop while waiting for results.
 
 - `asyncio` - For asynchronous operations
 - `pydantic` - For data validation and model mapping
-- `jinjasql` - For SQL templating with Jinja2
+- `jinjasql2` - For SQL templating with Jinja2
 - `psycopg` - PostgreSQL database adapter for Python
 - `psycopg_pool` - Connection pooling for psycopg
+
+## Development and Testing
+
+### Setting Up Development Environment
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/tungph/pgjinja.git
+   cd pgjinja
+   ```
+
+2. Create and activate a virtual environment:
+   ```bash
+   uv venv
+   . .venv/bin/activate
+   ```
+
+3. Install development dependencies:
+   ```bash
+   uv pip install pytest pytest-asyncio pytest-cov
+   pip install -e .
+   ```
+
+### Running Tests
+
+To run the test suite:
+
+```bash
+make test
+```
+
+This will:
+
+- Set up a virtual environment
+- Install necessary test dependencies
+- Run the tests with code coverage reporting
 
 ## License
 

@@ -1,17 +1,24 @@
 # Makefile for Python project management
 
 # .PHONY declaration prevents conflicts with files of the same name
-.PHONY: install test clean lint format build publish-test publish help
+.PHONY: install test clean lint format lint-format build publish-test publish help
 
 # Install dependencies from requirements.txt if it exists
 install:
 	uv sync
 
-# Run tests using pytest (or your preferred test framework)
+# Run tests using pytest with proper path setup
 test:
 	@echo "Setting up and activating virtual environment..."
-	@uv venv || true
-	@. .venv/bin/activate && pip uninstall -y pgjinja && pip install -e . && PYTHONPATH=$PYTHONPATH:$(pwd)/src pytest tests/ -v --cov=src/pgjinja
+	@. .venv/bin/activate && \
+		uv pip install pytest pytest-asyncio pytest-cov && \  ruff
+		uv pip install -e . && \
+		cd src && \
+		PYTHONPATH=. pytest ../tests/ -v \
+			--cov=pgjinja \
+			--cov-report=term-missing \
+			--asyncio-mode=strict \
+			|| { echo "Tests failed!"; exit 1; }
 
 # Clean up compiled Python files and cache directories
 clean:
@@ -24,15 +31,19 @@ clean:
 	find . -type d -name "*.egg-info" -exec rm -rf {} +
 	find . -type d -name "*.egg" -exec rm -rf {} +
 
-# Run code linting with flake8
+# Run code linting with ruff
 lint:
 	@echo "Running code linting..."
-	flake8 .
+	ruff check .
 
-# Format code using black
+# Format code using ruff
 format:
+
+# Run both linting and formatting
+lint-format: lint format
+t@echo "Linting and formatting completed!"
 	@echo "Formatting code with black..."
-	black .
+	ruff format .
 
 # Build distribution packages
 build: clean
@@ -78,8 +89,9 @@ help:
 	@echo "  install - Install Python dependencies from requirements.txt using uv"
 	@echo "  test    - Run tests"
 	@echo "  clean   - Clean up Python cache files"
-	@echo "  lint    - Run code linting with flake8"
-	@echo "  format  - Format code with black"
+	@echo "  lint    - Run code linting with ruff"
+	@echo "  format  - Format code with ruff"
+t@echo "  lint-format - Run both linting and formatting with ruff"
 	@echo "  build   - Build distribution packages"
 	@echo "  publish-test - Publish package to TestPyPI"
 	@echo "  publish - Publish package to PyPI"

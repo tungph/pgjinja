@@ -1,10 +1,11 @@
+import os
+import tempfile
 import unittest
 from pathlib import Path
-import tempfile
-import os
 from unittest.mock import AsyncMock, patch, MagicMock
 
 from pgjinja.postgres import PostgresAsync
+
 
 class TestPostgresAsync(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
@@ -25,27 +26,27 @@ class TestPostgresAsync(unittest.IsolatedAsyncioTestCase):
         self.cursor.description = [('id',), ('name',)]
         self.cursor.fetchall = AsyncMock(return_value=[(1, "test")])
         self.cursor.execute = AsyncMock()
-        
+
         # Create connection mock with async context support
         self.conn = MagicMock()
         self.conn.cursor = MagicMock(return_value=self.cursor)
-        
+
         # Setup async context managers
         self.cursor.__aenter__ = AsyncMock(return_value=self.cursor)
         self.cursor.__aexit__ = AsyncMock(return_value=None)
         self.conn.__aenter__ = AsyncMock(return_value=self.conn)
         self.conn.__aexit__ = AsyncMock(return_value=None)
-        
+
         # Create pool mock
         self.pool = MagicMock()
         self.pool.connection = MagicMock(return_value=self.conn)
         self.pool.open = AsyncMock()
-        
+
         # Setup pool patcher
         self.pool_patcher = patch('pgjinja.postgres.AsyncConnectionPool')
         self.mock_pool_class = self.pool_patcher.start()
         self.mock_pool_class.return_value = self.pool
-        
+
         # Create PostgresAsync instance
         self.db_client = PostgresAsync(
             user="test_user",
@@ -73,7 +74,7 @@ class TestPostgresAsync(unittest.IsolatedAsyncioTestCase):
         await self.db_client._open_pool()
         self.pool.open.assert_called_once()
         self.assertTrue(self.db_client._is_pool_open)
-        
+
         await self.db_client._open_pool()
         self.assertEqual(self.pool.open.call_count, 1)
 
@@ -115,19 +116,19 @@ class TestPostgresAsync(unittest.IsolatedAsyncioTestCase):
         """Test non-select query"""
         self.cursor.description = None
         self.cursor.rowcount = 1
-        
+
         result = await self.db_client._run("UPDATE test SET value = %s", (42,))
         self.cursor.execute.assert_called_once_with("UPDATE test SET value = %s", (42,))
         self.assertEqual(result, 1)
-    
+
     async def test_error_handling(self):
         """Test database error handling"""
         self.cursor.execute.side_effect = Exception("Database error")
-        
+
         with self.assertRaises(Exception) as context:
             await self.db_client._run("SELECT * FROM missing_table")
         self.assertEqual(str(context.exception), "Database error")
-    
+
     async def test_missing_template(self):
         """Test handling of missing template files"""
         with self.assertRaises(FileNotFoundError):

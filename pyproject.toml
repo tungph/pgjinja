@@ -50,4 +50,37 @@ dev = []
 dev = [
     "build>=0.10.0",
     "twine>=4.0.2",
+    "ruff>=0.0.292",
 ]
+
+[tool.ruff]
+# Enable pycodestyle (E), Pyflakes (F), and isort (I)
+lint.select = ["E", "F", "I", "B", "W", "C90"]
+# Same as Black
+line-length = 88
+# Avoid touching files with errors
+fix = true
+# Avoid error when there are no files to check
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+]
+# Allow unused variables when underscore-prefixed
+lint.ignore = ["E501", "B905"]
+
+# Configure isort rules for Ruff
+[tool.ruff.lint.isort]
+known-first-party = ["pgjinja"]
+
+# Configure flake8 compatibility settings
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 88
+
+# Configure formatter
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
