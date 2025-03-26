@@ -15,9 +15,9 @@ Features:
 
 __version__ = "0.1.0"
 
-from .postgres import PostgresAsync
+from .pgjinja import PgJinja
 
 # Export common classes and functions
 __all__ = [
-    "PostgresAsync",
+    "PgJinja",
 ]

@@ -4,10 +4,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from pgjinja.postgres import PostgresAsync
+from pgjinja import PgJinja
 
 
-class TestPostgresAsync(unittest.IsolatedAsyncioTestCase):
+class TestPgJinja(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         # Create temp directory and template
         self.temp_dir = tempfile.mkdtemp()
@@ -43,12 +43,12 @@ class TestPostgresAsync(unittest.IsolatedAsyncioTestCase):
         self.pool.open = AsyncMock()
 
         # Setup pool patcher
-        self.pool_patcher = patch("pgjinja.postgres.AsyncConnectionPool")
+        self.pool_patcher = patch("pgjinja.pgjinja.AsyncConnectionPool")
         self.mock_pool_class = self.pool_patcher.start()
         self.mock_pool_class.return_value = self.pool
 
         # Create PostgresAsync instance
-        self.db_client = PostgresAsync(
+        self.db_client = PgJinja(
             user="test_user",
             password="test_password",
             host="localhost",

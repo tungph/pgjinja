@@ -31,13 +31,13 @@ from functools import cache
 
 from src.models.merchant import Merchant
 
-from src.postgres import PostgresAsync
+from pgjinja import PgJinja
 
 
 # Create a PostgreSQL connection
 @cache
 def get_postgres():
-    return PostgresAsync(
+    return PgJinja(
         user="user",
         password="password",
         host="dev.postgres",
@@ -89,7 +89,7 @@ LIMIT {{ limit }}
 
 ## Configuration
 
-The `PostgresAsync` class accepts the following configuration parameters:
+The `PgJinja` class accepts the following configuration parameters:
 
 | Parameter          | Description                                | Default           |
 |--------------------|--------------------------------------------|-------------------|

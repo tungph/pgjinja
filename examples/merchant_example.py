@@ -13,7 +13,7 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from src.pgjinja.postgres import PostgresAsync
+from src.pgjinja import PgJinja
 
 logging.basicConfig(
     format=">> %(levelname)s %(name)s  %(message)s", level=logging.DEBUG
@@ -42,7 +42,7 @@ def get_postgres():
     Uses configuration from config.ini file.
 
     Returns:
-        PostgresAsync: A configured database connection instance
+        PgJinja: A configured database connection instance
     """
     # Load configuration from config.ini
     config = configparser.ConfigParser()
@@ -50,7 +50,7 @@ def get_postgres():
     config.read(config_path)
 
     db_config = config["database"]
-    return PostgresAsync(
+    return PgJinja(
         user=db_config["user"],
         password=db_config["password"],
         host=db_config["host"],

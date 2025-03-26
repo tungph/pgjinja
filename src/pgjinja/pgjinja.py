@@ -17,7 +17,7 @@ def _read_text(file: Path) -> str:
     return file.read_text(encoding="utf8")
 
 
-class PostgresAsync:
+class PgJinja:
     def __init__(
         self,
         user: str,
