@@ -94,9 +94,7 @@ class PgJinja:
         if params is None:
             params = dict()
 
-        if model is dict:
-            params |= dict(_model_fields_=", ".join(model.__annotations__.keys()))
-        elif isinstance(model, type) and issubclass(model, BaseModel):
+        if isinstance(model, type) and issubclass(model, BaseModel):
             params |= dict(_model_fields_=_get_model_fields(model))
 
         statement = _read_text(self.template_dir / template)
