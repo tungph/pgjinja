@@ -7,7 +7,7 @@ name = "pgjinja"
 version = "1.4.0"
 description = "A Python package that seamlessly integrates PostgreSQL, Jinja templating, and Pydantic for type-safe database queries"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [
     { name = "Shawn", email = "shawn.dev.vn@gmail.com" },
