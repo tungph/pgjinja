@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import LiteralString
 
 from jinjasql import JinjaSql
+from psycopg import OperationalError
 from psycopg.conninfo import make_conninfo
 from psycopg_pool import AsyncConnectionPool
 from pydantic import BaseModel
@@ -75,18 +76,24 @@ class PgJinja:
         model: type | None = None,
     ):
         await self._open_pool()
-        async with self.pool.connection() as connection, connection.cursor() as cursor:
-            await cursor.execute(query, params)
-            if cursor.description:
-                if model is not None:
-                    headers = [desc[0] for desc in cursor.description]
-                    rows = await cursor.fetchall()
-                    mapped_rows = [dict(zip(headers, r)) for r in rows]
-                    return [model(**r) for r in mapped_rows]
-                else:
-                    return await cursor.fetchall()
+        try:
+            async with self.pool.connection() as connection, connection.cursor() as cursor:
+                await cursor.execute(query, params)
+                if cursor.description:
+                    if model is not None:
+                        headers = [desc[0] for desc in cursor.description]
+                        rows = await cursor.fetchall()
+                        mapped_rows = [dict(zip(headers, r)) for r in rows]
+                        return [model(**r) for r in mapped_rows]
+                    else:
+                        return await cursor.fetchall()
 
-            return cursor.rowcount
+                return cursor.rowcount
+        except OperationalError as e:
+            if self._is_pool_open and "SSL SYSCALL error: EOF detected" in str(e):
+                logger.warning(f'Connection is closed! Trying to reconnect...')
+                self._is_pool_open = False
+                return await self._run(query, params, model)
 
     async def query(
         self, template: str, params: dict | None = None, model: type | None = None
