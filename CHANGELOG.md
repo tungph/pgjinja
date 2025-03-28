@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2025-03-28
+
+### Added
+- Handle OperationalError in database query execution
+
+### Changed
+- Linting: Standardize string quotes and format spacing
+
+## [1.3.0] - 2025-03-27
+
+### Added
+- Add PgModel class with database operation methods
+- Refactor model field extraction logic in pgjinja.py
+
 ## [1.2.0] - 2025-03-26
 
 ### Changed
@@ -32,7 +46,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Basic functionality
 - Initial release
 
-[Unreleased]: https://github.com/tungph/pgjinja/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/tungph/pgjinja/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/tungph/pgjinja/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/tungph/pgjinja/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/tungph/pgjinja/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/tungph/pgjinja/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/tungph/pgjinja/compare/v0.1.0...v1.0.0
