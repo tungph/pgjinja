@@ -91,7 +91,7 @@ class PgJinja:
                 return cursor.rowcount
         except OperationalError as e:
             if self._is_pool_open and "SSL SYSCALL error: EOF detected" in str(e):
-                logger.warning(f'Connection is closed! Trying to reconnect...')
+                logger.warning("The connection is closed! Trying to reconnect...")
                 self._is_pool_open = False
                 return await self._run(query, params, model)
 
