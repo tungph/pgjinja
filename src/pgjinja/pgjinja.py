@@ -94,6 +94,18 @@ class PgJinja:
                 logger.warning("The connection is closed! Trying to reconnect...")
                 self._is_pool_open = False
                 return await self._run(query, params, model)
+            else:
+                logger.exception(f"PgJinja OperationalError: {e}"
+                                 f"\nQuery: {query}"
+                                 f"\nParams: {params}"
+                                 f"nModel: {model}")
+                raise
+        except Exception as e:
+            logger.exception(f"PgJinja Exception: {e}"
+                             f"\nQuery: {query}"
+                             f"\nParams: {params}"
+                             f"\nModel: {model}")
+            raise
 
     async def query(
         self, template: str, params: dict | None = None, model: type | None = None
