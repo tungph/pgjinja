@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import LiteralString
 
 from jinjasql import JinjaSql
-from psycopg import OperationalError
 from psycopg.conninfo import make_conninfo
 from psycopg_pool import AsyncConnectionPool
 from pydantic import BaseModel
@@ -33,6 +32,12 @@ def _get_model_fields(model: type) -> str:
     return ", ".join(fields)
 
 
+async def _handle_reconnect_failure(pool):
+    logger.warning("Reconnection failed, attempting recovery...")
+    await pool.close()
+    await pool.open()
+
+
 class PgJinja:
     def __init__(
         self,
@@ -42,6 +47,9 @@ class PgJinja:
         port: int = 5432,
         dbname: str = "public",
         template_dir: PathLike | str = Path(),
+        max_size: int = 12,
+        min_size: int = 1,
+        application_name="pgjinja",
     ):
         self.template_dir = Path(template_dir)
         self.db = f"{host}:{port}/{dbname}"
@@ -54,20 +62,21 @@ class PgJinja:
                 dbname=dbname,
                 user=user,
                 password=password,
+                application_name=application_name,
             ),
+            reconnect_failed=_handle_reconnect_failure,
+            max_size=max_size,
+            min_size=min_size,
             open=False,
         )
-
-        self._is_pool_open = False
 
     def __del__(self):
         del self.pool
 
     async def _open_pool(self):
-        if not self._is_pool_open:
+        if not self.pool._opened:
             await self.pool.open()
             logger.debug(f"Opened connection pool to {self.db}")
-            self._is_pool_open = True
 
     async def _run(
         self,
@@ -77,7 +86,10 @@ class PgJinja:
     ):
         await self._open_pool()
         try:
-            async with self.pool.connection() as connection, connection.cursor() as cursor:
+            async with (
+                self.pool.connection() as connection,
+                connection.cursor() as cursor,
+            ):
                 await cursor.execute(query, params)
                 if cursor.description:
                     if model is not None:
@@ -89,22 +101,15 @@ class PgJinja:
                         return await cursor.fetchall()
 
                 return cursor.rowcount
-        except OperationalError as e:
-            if self._is_pool_open and "SSL SYSCALL error: EOF detected" in str(e):
-                logger.warning("The connection is closed! Trying to reconnect...")
-                self._is_pool_open = False
-                return await self._run(query, params, model)
-            else:
-                logger.exception(f"PgJinja OperationalError: {e}"
-                                 f"\nQuery: {query}"
-                                 f"\nParams: {params}"
-                                 f"nModel: {model}")
-                raise
         except Exception as e:
-            logger.exception(f"PgJinja Exception: {e}"
-                             f"\nQuery: {query}"
-                             f"\nParams: {params}"
-                             f"\nModel: {model}")
+            stats = self.pool.get_stats()
+            logger.exception(
+                f"PgJinja Exception: {e}"
+                f"\nQuery: {query}"
+                f"\nParams: {params}"
+                f"\nModel: {model}"
+                f"\nPool Stats: {stats}"
+            )
             raise
 
     async def query(

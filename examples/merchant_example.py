@@ -89,6 +89,15 @@ async def main():
     # Fetch merchants using the convenience function
     merchants = await select_merchant()
     print(merchants)
+    n = 60 * 60 + 100
+    while True:
+        print(f"Waiting for {n:.1f} seconds...")
+        await asyncio.sleep(n)
+        n *= 1.2
+
+        print("Fetching merchants again...")
+        merchants = await select_merchant()
+        print(merchants)
 
 
 if __name__ == "__main__":
