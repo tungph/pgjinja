@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import LiteralString
 
 from jinjasql import JinjaSql
+from psycopg import OperationalError
 from psycopg.conninfo import make_conninfo
 from psycopg_pool import AsyncConnectionPool
 from pydantic import BaseModel
@@ -55,6 +56,7 @@ class PgJinja:
         self.db = f"{host}:{port}/{dbname}"
 
         self.pool = AsyncConnectionPool(
+            # ref: https://www.psycopg.org/psycopg3/docs/advanced/pool.html#
             conninfo=make_conninfo(
                 # keyword reference: https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
                 host=host,
@@ -74,6 +76,7 @@ class PgJinja:
         del self.pool
 
     async def _open_pool(self):
+        # noinspection PyProtectedMember
         if not self.pool._opened:
             await self.pool.open()
             logger.debug(f"Opened connection pool to {self.db}")
@@ -83,6 +86,7 @@ class PgJinja:
         query: LiteralString,
         params: dict | Sequence = (),
         model: type | None = None,
+        try_count: int = 0,
     ):
         await self._open_pool()
         try:
@@ -110,6 +114,12 @@ class PgJinja:
                 f"\nModel: {model}"
                 f"\nPool Stats: {stats}"
             )
+            if try_count == 0 and isinstance(e, OperationalError):
+                logger.error(
+                    "OperationalError: Connection may be lost. Reconnecting..."
+                )
+                await _handle_reconnect_failure(self.pool)
+                return await self._run(query, params, model, try_count=1)
             raise
 
     async def query(
