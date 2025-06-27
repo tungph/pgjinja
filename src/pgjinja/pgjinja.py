@@ -115,9 +115,11 @@ class PgJinja:
             open=False,
         )
 
-    def __del__(self):
-        if hasattr(self, 'pool'):
+    def close(self):
+        """Close the connection pool. """
+        if hasattr(self, 'pool') and self.pool._opened:
             self.pool.close()
+            logger.debug("Closed async connection pool")
 
     def _open_pool(self):
         # noinspection PyProtectedMember
