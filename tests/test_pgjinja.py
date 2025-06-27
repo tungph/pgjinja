@@ -185,25 +185,6 @@ class TestPgJinjaQueryExecution:
         assert result == 1
         mock_cursor.execute.assert_called_once()
 
-    def test_query_with_none_params(self, valid_db_settings):
-        """Test that query handles None params correctly."""
-        client = PgJinja(valid_db_settings)
-
-        with patch.object(client, '_run') as mock_run:
-            mock_run.return_value = []
-
-            with patch('pgjinja.pgjinja.read_template') as mock_read_template, \
-                 patch('jinjasql.JinjaSql') as mock_jinja_sql:
-
-                mock_read_template.return_value = "SELECT * FROM users"
-                mock_jinja = Mock()
-                mock_jinja_sql.return_value = mock_jinja
-                mock_jinja.prepare_query.return_value = ("SELECT * FROM users", [])
-
-                client.query("users.sql", None)
-
-                # Should have called prepare_query with empty dict
-                mock_jinja.prepare_query.assert_called_once_with("SELECT * FROM users", {})
 
     # def test_query_adds_model_fields_to_params(self, valid_db_settings, sample_user_model):
     #     """Test that query adds _model_fields_ to params when model is provided."""

@@ -35,7 +35,7 @@ class PgJinjaAsync(PgJinja):
         >>> import asyncio
         >>> from pgjinja import PgJinjaAsync, DBSettings
         >>> from pydantic import SecretStr
-        >>> 
+        >>>
         >>> async def main():
         ...     settings = DBSettings(
         ...         user="myuser",
@@ -55,7 +55,7 @@ class PgJinjaAsync(PgJinja):
         ...     id: int
         ...     name: str
         ...     email: str
-        >>> 
+        >>>
         >>> async def get_users():
         ...     client = PgJinjaAsync(settings)
         ...     users = await client.query("users.sql", model=User)
@@ -120,7 +120,8 @@ class PgJinjaAsync(PgJinja):
             - Template directory from settings is used to resolve template file paths
             - Pool is asyncio-compatible and safe for concurrent async operations
         """
-        super().__init__(db_settings)
+        # Initialize settings but skip parent's __init__ to avoid creating a sync pool
+        self.settings = db_settings
 
         self.pool = AsyncConnectionPool(
             conninfo=self.settings.coninfo,
@@ -176,6 +177,39 @@ class PgJinjaAsync(PgJinja):
                     raise
                 logger.warning(f"Retrying query ({attempts}/{max_retries})...")
 
+    async def close(self):
+        """Asynchronously close the connection pool.
+
+        This method should be called when the client is no longer needed to properly
+        release database connections. It's important to await this method in async
+        applications to avoid resource leaks.
+
+        Examples:
+            >>> async def main():
+            ...     client = PgJinjaAsync(settings)
+            ...     # Use client...
+            ...     await client.close()  # Properly close connections
+        """
+        if hasattr(self, 'pool') and self.pool._opened:
+            await self.pool.close()
+            logger.debug("Closed async connection pool")
+
+    def __del__(self):
+        """Destructor that logs a warning about proper resource cleanup.
+
+        Since __del__ cannot be async and the pool's close() method is a coroutine,
+        we cannot properly close the pool in this method. Applications should
+        explicitly call and await close() instead.
+
+        For test compatibility, we don't attempt to close the pool here at all,
+        as that would result in a "coroutine was never awaited" warning.
+        """
+        if hasattr(self, 'pool') and self.pool._opened:
+            logger.warning(
+                "PgJinjaAsync pool was not closed properly. "
+                "Please use 'await client.close()' to properly release resources."
+            )
+
     async def query(
         self, template: str, params: dict | None = None, model: type | None = None
     ):
@@ -224,7 +258,7 @@ class PgJinjaAsync(PgJinja):
             >>> class User(BaseModel):
             ...     id: int
             ...     name: str
-            >>> 
+            >>>
             >>> async def get_users():
             ...     client = PgJinjaAsync(settings)
             ...     users = await client.query("users.sql", {"min_age": 18}, User)

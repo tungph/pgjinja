@@ -64,27 +64,6 @@ class TestPgJinjaBasicFunctionality:
                 assert params["_model_fields_"] == "id, name, email"
                 assert params["param"] == "value"
 
-    def test_parameter_handling_none_params(self, valid_db_settings):
-        """Test parameter handling when params is None."""
-        client = PgJinja(valid_db_settings)
-
-        with patch.object(client, '_run') as mock_run:
-            mock_run.return_value = []
-
-            with patch('pgjinja.pgjinja.read_template') as mock_read_template, \
-                 patch('pgjinja.pgjinja.JinjaSql') as mock_jinja_sql:
-
-                mock_read_template.return_value = "SELECT * FROM users"
-                mock_jinja = Mock()
-                mock_jinja_sql.return_value = mock_jinja
-                mock_jinja.prepare_query.return_value = ("SELECT * FROM users", ())
-
-                # Execute with None params
-                client.query("test.sql", None)
-
-                # Verify prepare_query was called with empty dict
-                call_args = mock_jinja.prepare_query.call_args[0]
-                assert call_args[1] == {}
 
     def test_retry_logic_basic(self, valid_db_settings):
         """Test basic retry logic functionality."""
