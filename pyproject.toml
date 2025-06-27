@@ -63,11 +63,18 @@ dev = [
     "build>=0.10.0",
     "twine>=4.0.2",
     "ruff>=0.0.292",
+    "pytest>=8.2",
+    "pytest-asyncio>=0.23",
+    "pytest-mock>=3.14",
+    "pytest-cov>=5",
+    "asyncpg", # or "pytest-postgresql" for live DB tests
 ]
 
 [tool.ruff]
 # Enable pycodestyle (E), Pyflakes (F), and isort (I)
 lint.select = ["E", "F", "I", "B", "W", "C90"]
+# Allow unused variables when underscore-prefixed
+lint.ignore = ["E501", "B905", "W505"]
 # Same as Black
 line-length = 88
 # Avoid touching files with errors
@@ -80,8 +87,6 @@ exclude = [
     "build",
     "dist",
 ]
-# Allow unused variables when underscore-prefixed
-lint.ignore = ["E501", "B905", "W505"]
 
 # Configure isort rules for Ruff
 [tool.ruff.lint.isort]

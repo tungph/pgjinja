@@ -1,7 +1,7 @@
 # pgjinja
 
 A Python library that combines PostgreSQL with Jinja2 templates to create dynamic SQL queries with a
-clean, async interface.
+clean, async interface and comprehensive API documentation.
 
 ## Description
 
@@ -9,11 +9,13 @@ pgjinja simplifies database interactions by allowing you to:
 
 - Keep SQL queries in separate template files
 - Use Jinja2 templating for dynamic query generation
-- Execute queries asynchronously
+- Execute queries asynchronously with connection pooling
 - Automatically map query results to Pydantic models
+- Access comprehensive docstrings and API documentation for all classes and functions
 
 This approach helps separate SQL logic from application code, making your database interactions more
-maintainable and testable.
+maintainable and testable. All classes and functions include detailed docstrings with examples and
+type annotations for excellent IDE integration.
 
 ## Installation
 
@@ -21,30 +23,90 @@ maintainable and testable.
 pip install pgjinja
 ```
 
+## API Reference
+
+The pgjinja library provides the following key classes and functions:
+
+- [`PgJinja`](src/pgjinja/pgjinja.py#L15)
+- [`PgJinjaAsync`](src/pgjinja/pgjinja_async.py#L16)
+- [`DBSettings`](src/pgjinja/schemas/db_settings.py#L6)
+
+Each link will take you to the definition and comprehensive docstring for the respective class or function.
+
 ## Usage Example
 
-Here's a simple example of how to use pgjinja to query merchants from a database:
+### Basic Usage
+
+```python
+# Basic imports and setup
+from pathlib import Path
+from pydantic import BaseModel, SecretStr
+from pgjinja import PgJinja, PgJinjaAsync, DBSettings
+
+# Construct DBSettings explicitly
+settings = DBSettings(
+    user="myuser",
+    password=SecretStr("mypass"),
+    host="localhost",
+    dbname="mydb",
+    template_dir=Path("./templates")
+)
+
+# Create PgJinja client instance
+client = PgJinja(settings)
+
+# Sync query example
+result = client.query("users.sql", {"user_id": 1})
+
+# Async query example
+async def get_user_async():
+    client = PgJinjaAsync(settings)
+    return await client.query("users.sql", {"user_id": 1})
+
+# Demonstrating the _model_fields_ template trick
+class UserModel(BaseModel):
+    user_id: int
+    user_name: str
+
+# When used with query, _model_fields_ will automatically provide 'user_id, user_name'
+users = client.query("users.sql", model=UserModel)
+
+# Showing connection pooling stats retrieval
+pool_stats = client.pool.get_stats()
+print("Connection Pool Stats:", pool_stats)
+
+# Async example of pooling stats
+async def show_async_pool_stats():
+    async_client = PgJinjaAsync(settings)
+    stats = async_client.pool.get_stats()
+    print("Async Connection Pool Stats:", stats)
+```
+
+### Complete Application Example
 
 ```python
 # src/my_db.py
 from functools import cache
+from pathlib import Path
+from pydantic import BaseModel, SecretStr
 
-from src.models.merchant import Merchant
+from pgjinja import PgJinjaAsync, DBSettings
 
-from pgjinja import PgJinja
-
+class Merchant(BaseModel):
+    id: int
+    name: str
 
 # Create a PostgreSQL connection
 @cache
 def get_postgres():
-    return PgJinja(
+    settings = DBSettings(
         user="user",
-        password="password",
+        password=SecretStr("password"),
         host="dev.postgres",
-        template_dir="template",
+        template_dir=Path("template"),
         dbname="dbname",
     )
-
+    return PgJinjaAsync(settings)
 
 # Query using a template with parameters
 async def select_merchant(limit: int = 3) -> list[Merchant]:
@@ -130,6 +192,50 @@ LIMIT 3
 ```
 
 This approach ensures your SQL queries always match your model fields, even when you add or remove fields from your Pydantic models.
+
+## Advanced Features
+
+### Connection Pool Management
+
+Both `PgJinja` and `PgJinjaAsync` provide sophisticated connection pool management:
+
+```python
+# Access pool statistics
+stats = client.pool.get_stats()
+print(f"Pool size: {stats.pool_size}")
+print(f"Available connections: {stats.pool_available}")
+print(f"Active connections: {stats.pool_max_size - stats.pool_available}")
+
+# Configure pool sizing for different workloads
+settings = DBSettings(
+    user="myuser",
+    password=SecretStr("mypass"),
+    host="localhost",
+    dbname="mydb",
+    min_size=5,  # Minimum connections to maintain
+    max_size=20  # Maximum connections allowed
+)
+```
+
+### Using Utility Functions Directly
+
+You can also use the underlying utility functions directly:
+
+```python
+from pgjinja import read_template, get_model_fields
+from pathlib import Path
+
+# Read template files directly
+template_content = read_template(Path("./templates/complex_query.sql"))
+
+# Get model fields for custom template processing
+class UserModel(BaseModel):
+    id: int
+    email: str
+    name: str
+
+fields = get_model_fields(UserModel)  # Returns "id, email, name"
+```
 
 ## Configuration
 

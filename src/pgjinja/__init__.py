@@ -18,10 +18,13 @@ __version__ = "1.4.3"
 from .pgjinja import PgJinja
 from .pgjinja_async import PgJinjaAsync
 from .schemas.db_settings import DBSettings
+from .shared.common import read_template, get_model_fields
 
 # Export common classes and functions
 __all__ = [
     "PgJinja",
     "PgJinjaAsync",
     "DBSettings",
+    "read_template",
+    "get_model_fields",
 ]
