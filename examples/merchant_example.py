@@ -13,7 +13,7 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from src.pgjinja import PgJinja
+from src.pgjinja import PgJinjaAsync, DBSettings
 
 logging.basicConfig(
     format=">> %(levelname)s %(name)s  %(message)s", level=logging.DEBUG
@@ -42,7 +42,7 @@ def get_postgres():
     Uses configuration from config.ini file.
 
     Returns:
-        PgJinja: A configured database connection instance
+        PgJinjaAsync: A configured database connection instance
     """
     # Load configuration from config.ini
     config = configparser.ConfigParser()
@@ -50,13 +50,18 @@ def get_postgres():
     config.read(config_path)
 
     db_config = config["database"]
-    return PgJinja(
+    template_dir = Path(__file__).parent / "template"
+
+    # Create DBSettings object with the configuration
+    db_settings = DBSettings(
         user=db_config["user"],
         password=db_config["password"],
         host=db_config["host"],
         dbname=db_config["dbname"],
-        template_dir="template",  # Directory containing SQL Jinja templates
+        template_dir=template_dir,
     )
+
+    return PgJinjaAsync(db_settings)
 
 
 async def select_merchant(limit: int = 3) -> list[Merchant]:

@@ -34,8 +34,10 @@ class DBSettings(BaseModel):
     """Application name to identify this connection in PostgreSQL logs. Defaults to 'pgjinja'."""
 
     def __repr__(self) -> str:
-        """Return a string representation of the DBSettings instance without exposing sensitive information."""
         return f"{self.host}:{self.port}/{self.dbname}"
+
+    def __str__(self) -> str:
+        return self.__repr__()
 
     @property
     def coninfo(self) -> str:
@@ -43,10 +45,10 @@ class DBSettings(BaseModel):
 
         return make_conninfo(
             # keyword reference: https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
-            host=self.settings.host,
-            port=self.settings.port,
-            dbname=self.settings.dbname,
-            user=self.settings.user,
-            password=self.settings.password.get_secret_value(),
-            application_name=self.settings.application_name,
+            host=self.host,
+            port=self.port,
+            dbname=self.dbname,
+            user=self.user,
+            password=self.password.get_secret_value(),
+            application_name=self.application_name,
         )

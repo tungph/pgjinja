@@ -16,8 +16,12 @@ Features:
 __version__ = "1.4.3"
 
 from .pgjinja import PgJinja
+from .pgjinja_async import PgJinjaAsync
+from .schemas.db_settings import DBSettings
 
 # Export common classes and functions
 __all__ = [
     "PgJinja",
+    "PgJinjaAsync",
+    "DBSettings",
 ]

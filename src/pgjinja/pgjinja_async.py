@@ -5,10 +5,10 @@ from typing import LiteralString
 from jinjasql import JinjaSql
 from psycopg_pool import AsyncConnectionPool
 from pydantic import BaseModel
-from schemas.db_settings import DBSettings
-from shared.common import get_model_fields, read_template
 
-from pgjinja import PgJinja
+from .schemas.db_settings import DBSettings
+from .shared.common import get_model_fields, read_template
+from .pgjinja import PgJinja
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class PgJinjaAsync(PgJinja):
         # noinspection PyProtectedMember
         if not self.pool._opened:
             await self.pool.open()
-            logger.debug(f"Opened connection pool to {self.db}")
+            logger.debug(f"Opened connection pool to {self.settings}")
 
     async def _run(
         self,
@@ -80,7 +80,7 @@ class PgJinjaAsync(PgJinja):
         if isinstance(model, type) and issubclass(model, BaseModel):
             params |= dict(_model_fields_=get_model_fields(model))
 
-        statement = read_template(self.template_dir / template)
+        statement = read_template(self.settings.template_dir / template)
         query, bind_params = JinjaSql(param_style="format").prepare_query(
             statement, params or ()
         )

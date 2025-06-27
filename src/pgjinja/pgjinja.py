@@ -5,8 +5,9 @@ from typing import LiteralString
 from jinjasql import JinjaSql
 from psycopg_pool import ConnectionPool
 from pydantic import BaseModel
-from schemas.db_settings import DBSettings
-from shared.common import get_model_fields, read_template
+
+from .schemas.db_settings import DBSettings
+from .shared.common import get_model_fields, read_template
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,8 @@ class PgJinja:
         )
 
     def __del__(self):
-        self.pool.close()
+        if hasattr(self, 'pool'):
+            self.pool.close()
 
     def _open_pool(self):
         # noinspection PyProtectedMember
