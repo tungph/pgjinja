@@ -13,7 +13,7 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from src.pgjinja import PgJinjaAsync, DBSettings
+from src.pgjinja import DBSettings, PgJinjaAsync
 
 logging.basicConfig(
     format=">> %(levelname)s %(name)s  %(message)s", level=logging.DEBUG

@@ -13,7 +13,7 @@ class TestDBSettings:
             user="testuser",
             password=SecretStr("testpass")
         )
-        
+
         assert settings.user == "testuser"
         assert settings.password.get_secret_value() == "testpass"
         assert settings.host == "localhost"
@@ -38,7 +38,7 @@ class TestDBSettings:
             max_size=50,
             application_name="my-app"
         )
-        
+
         assert settings.user == "admin"
         assert settings.password.get_secret_value() == "secret123"
         assert settings.host == "db.example.com"
@@ -56,10 +56,10 @@ class TestDBSettings:
             user="testuser",
             password=SecretStr(password)
         )
-        
+
         # Password should be stored as SecretStr
         assert isinstance(settings.password, SecretStr)
-        
+
         # Secret value should be retrievable but not visible in repr
         assert settings.password.get_secret_value() == password
         assert password not in str(settings)
@@ -74,15 +74,15 @@ class TestDBSettings:
             port=5433,
             dbname="testdb"
         )
-        
+
         str_repr = str(settings)
         repr_str = repr(settings)
-        
+
         # Should include connection details
         assert "db.example.com" in str_repr
         assert "5433" in str_repr
         assert "testdb" in str_repr
-        
+
         # Should not include sensitive information
         assert "supersecret" not in str_repr
         assert "testuser" not in str_repr
@@ -98,9 +98,9 @@ class TestDBSettings:
             dbname="testdb",
             application_name="test-app"
         )
-        
+
         coninfo = settings.coninfo
-        
+
         # Should contain all connection parameters
         assert "host=localhost" in coninfo
         assert "port=5432" in coninfo
@@ -116,9 +116,9 @@ class TestDBSettings:
             user="testuser",
             password=SecretStr(special_password)
         )
-        
+
         coninfo = settings.coninfo
-        
+
         # Connection string should be properly escaped
         assert isinstance(coninfo, str)
         # The password should be included in some form (psycopg handles escaping)
@@ -129,14 +129,14 @@ class TestDBSettings:
         # Missing user
         with pytest.raises(ValidationError) as exc_info:
             DBSettings(password=SecretStr("testpass"))
-        
+
         errors = exc_info.value.errors()
         assert any(error["loc"] == ("user",) for error in errors)
-        
+
         # Missing password
         with pytest.raises(ValidationError) as exc_info:
             DBSettings(user="testuser")
-        
+
         errors = exc_info.value.errors()
         assert any(error["loc"] == ("password",) for error in errors)
 
@@ -149,7 +149,7 @@ class TestDBSettings:
             port=5432
         )
         assert settings.port == 5432
-        
+
         # Invalid port type should raise validation error
         with pytest.raises(ValidationError):
             DBSettings(
@@ -169,7 +169,7 @@ class TestDBSettings:
         )
         assert settings.min_size == 1
         assert settings.max_size == 10
-        
+
         # None max_size should be allowed
         settings = DBSettings(
             user="testuser",
@@ -190,7 +190,7 @@ class TestDBSettings:
         )
         assert isinstance(settings.template_dir, Path)
         assert str(settings.template_dir) == "/tmp/templates"
-        
+
         # Path object
         path_obj = Path("/custom/path")
         settings = DBSettings(

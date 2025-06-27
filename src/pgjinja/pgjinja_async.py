@@ -6,9 +6,9 @@ from jinjasql import JinjaSql
 from psycopg_pool import AsyncConnectionPool
 from pydantic import BaseModel
 
+from .pgjinja import PgJinja
 from .schemas.db_settings import DBSettings
 from .shared.common import get_model_fields, read_template
-from .pgjinja import PgJinja
 
 logger = logging.getLogger(__name__)
 
