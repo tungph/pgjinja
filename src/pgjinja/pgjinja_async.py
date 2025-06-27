@@ -14,10 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class PgJinjaAsync(PgJinja):
-    def __init__(
-        self,
-        db_settings: DBSettings
-    ):
+    def __init__(self, db_settings: DBSettings):
         super().__init__(db_settings)
 
         self.pool = AsyncConnectionPool(

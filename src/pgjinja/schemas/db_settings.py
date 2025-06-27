@@ -5,6 +5,7 @@ from pydantic import BaseModel, SecretStr
 
 class DBSettings(BaseModel):
     """PostgreSQL database connection settings and configuration parameters."""
+
     host: str = "localhost"
     """Database server hostname or IP address. Defaults to 'localhost'."""
 
@@ -37,8 +38,9 @@ class DBSettings(BaseModel):
         return f"{self.host}:{self.port}/{self.dbname}"
 
     @property
-    def coninfo(self)->str:
+    def coninfo(self) -> str:
         from psycopg.conninfo import make_conninfo
+
         return make_conninfo(
             # keyword reference: https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
             host=self.settings.host,

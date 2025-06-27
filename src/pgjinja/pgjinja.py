@@ -12,10 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class PgJinja:
-    def __init__(
-        self,
-        db_settings: DBSettings
-    ):
+    def __init__(self, db_settings: DBSettings):
         self.settings = db_settings
         self.pool = ConnectionPool(
             # ref: https://www.psycopg.org/psycopg3/docs/advanced/pool.html#

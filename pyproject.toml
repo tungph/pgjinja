@@ -81,7 +81,7 @@ exclude = [
     "dist",
 ]
 # Allow unused variables when underscore-prefixed
-lint.ignore = ["E501", "B905"]
+lint.ignore = ["E501", "B905", "W505"]
 
 # Configure isort rules for Ruff
 [tool.ruff.lint.isort]
