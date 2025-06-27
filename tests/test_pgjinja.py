@@ -149,20 +149,20 @@ class TestPgJinja(unittest.IsolatedAsyncioTestCase):
 
     def test_get_model_fields(self):
         """Test the _get_model_fields function with Pydantic models"""
-        from pgjinja.pgjinja import _get_model_fields
+        from pgjinja.pgjinja import get_model_fields
 
         class SimpleModel(BaseModel):
             id: int
             name: str
 
-        fields = _get_model_fields(SimpleModel)
+        fields = get_model_fields(SimpleModel)
         self.assertEqual(fields, "id, name")
 
         class ModelWithAlias(BaseModel):
             user_id: int = Field(validation_alias="id")
             user_name: str = Field(validation_alias="name")
 
-        fields = _get_model_fields(ModelWithAlias)
+        fields = get_model_fields(ModelWithAlias)
         self.assertEqual(fields, "id, name")
 
         # Test error case with non-BaseModel class
@@ -172,7 +172,7 @@ class TestPgJinja(unittest.IsolatedAsyncioTestCase):
                 self.name = name
 
         with self.assertRaises(TypeError):
-            _get_model_fields(RegularClass)
+            get_model_fields(RegularClass)
 
     async def test_query_with_pydantic_model(self):
         """Test query method with Pydantic model to verify field integration"""

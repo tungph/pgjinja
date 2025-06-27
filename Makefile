@@ -6,7 +6,7 @@
 # Set the default target
 .DEFAULT_GOAL := default
 # Default target - runs clean, install, format, lint, test in sequence
-default: clean install format lint test
+default: clean install lint test
 	@echo "Default sequence completed: clean, install, format, lint, test"
 
 # Install dependencies from requirements.txt if it exists
@@ -37,14 +37,8 @@ clean:
 	@find . -type d -name "*.egg-info" -exec rm -rf {} +
 	@find . -type d -name "*.egg" -exec rm -rf {} +
 
-# Run code linting with ruff
 lint:
-	@echo "Running code linting..."
-	ruff check .
-
-# Format code using ruff
-format:
-	@echo "Formatting code with ruff..."
+	ruff check --fix .
 	ruff format .
 
 # Run both linting and formatting
